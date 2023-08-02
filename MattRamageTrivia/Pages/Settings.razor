@@ -1,0 +1,57 @@
+﻿@page "/settings"
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
+<PageTitle>Settings</PageTitle>
+<td><button @onclick="OnClear">Clear</button></td>
+   
+<input type="text" @bind-value="_name" />
+<button @onclick="OnAdd">Add</button>
+
+<table>
+    <tr>
+        <th>Name</th>
+        <th></th>
+    </tr>    
+
+@foreach (var item in _contestants)
+{
+    <tr>
+        <td>@item.Name</td>
+        <td><button @onclick="() => OnRemove(item)">Remove</button></td>
+    </tr>
+}
+</table>
+
+@code {
+
+    private List<Contestant> _contestants = new();
+    private string _name = string.Empty;
+    async void OnAdd()
+    {
+        if (string.IsNullOrWhiteSpace(_name))
+        {
+
+            return;
+        }
+        _contestants.Add(new Contestant() { Name = _name });
+        await Save();
+        _name = string.Empty;
+        StateHasChanged();
+    }
+    async void OnClear()
+    {
+        _contestants = new();
+        await Save();
+        StateHasChanged();
+    }
+    async void OnRemove(Contestant contestant)
+    {
+        _contestants.Remove(contestant);
+        await Save();
+        StateHasChanged();
+    }
+    async Task Save()
+    {
+        await localStorage.SetItemAsync("Contestants", System.Text.Json.JsonSerializer.Serialize(_contestants));
+    }
+}

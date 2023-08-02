@@ -1,0 +1,103 @@
+﻿@page "/"
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
+<PageTitle>Matt Ramage Trivia</PageTitle>
+
+
+<!-- how can I create a randomizer circular spinner in HTML/css-->
+<style>
+    .spinner-container {
+        transform: @spinnerContainerTransform;
+    }
+</style>
+<div class="d-flex flex-row flex-wrap">
+
+    <div class="spinner-area">
+        <button id="spin" @onclick="btnSpin_Click">Spin</button>
+        <span class="arrow"></span>
+        <div class="spinner-container">
+            <div class="one">1</div>
+            <div class="two">2</div>
+            <div class="three">3</div>
+            <div class="four">4</div>
+            <div class="five">5</div>
+            <div class="six">6</div>
+            <div class="seven">7</div>
+            <div class="eight">8</div>
+        </div>
+    </div>
+
+    <div class="d-flex flex-column flex-fill">
+        <div class="d-flex flex-column flex-wrap flex-fill justify-content-around">
+            <div class="d-flex flex-grow-1 flex-fill align-items-center">
+                <div class="flex-fill text-center">Kevin</div>
+            </div>
+            <div class="d-flex flex-grow-1 flex-fill align-items-center ">
+                <div class="flex-fill text-center">Everly</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Contestant> _contestants = new();
+    private List<int> numbers = new();
+    private double deg = 0;
+    private int rotation = 0;
+    private string? spinnerContainerTransform => $"rotate({rotation}deg)";
+    void btnSpin_Click()
+    {
+        var rnd = new Random();
+        int change = rnd.Next(900, 1260);
+        var diff = System.Math.IEEERemainder(change, 45.0);
+        change -= (int)diff;
+        rotation += change;
+        deg = System.Math.IEEERemainder(rotation, 360.0);
+        numbers.Add(GetNumber(deg));
+        StateHasChanged();
+    }
+    int GetNumber(double deg)
+    {
+        switch (deg)
+        {
+            case 0:
+                return 1;
+            case 45:
+            case -315:
+                return 8;
+            case 90:
+            case -270:
+                return 7;
+            case 135:
+            case -225:
+                return 6;
+            case 180:
+            case -180:
+                return 5;
+            case 225:
+            case -135:
+                return 4;
+            case 270:
+            case -90:
+                return 3;
+            case 315:
+            case -45:
+                return 2;
+            default:
+                throw new ArgumentOutOfRangeException("degrees");
+        }
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+        var contestants = await localStorage.GetItemAsync<string>("Contestants");
+        if (string.IsNullOrWhiteSpace(contestants))
+        {
+            return;
+        }
+        _contestants = System.Text.Json.JsonSerializer.Deserialize<List<Contestant>>(contestants) ?? new List<Contestant>();
+    }
+}

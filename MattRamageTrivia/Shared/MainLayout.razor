@@ -1,0 +1,36 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>MattRamageTrivia</PageTitle>
+
+<div class="page">
+    <div class="@SidebarCssClass sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4 py-2">
+            <a class="navbar-brand" href="">Matt Ramage Trivia</a>
+
+            <button title="Sidebar menu" class="navbar-toggler" @onclick="ToggleSidebar">
+                <span class="oi @SidebarToggler"></span>
+            </button>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+
+@code {
+    private bool collapseSidebar = true;
+
+    private string? SidebarCssClass => collapseSidebar ? "collapse" : null;
+    private string? SidebarToggler => collapseSidebar ? "oi-menu" : "oi-x";
+
+    private void ToggleSidebar()
+    {
+        collapseSidebar = !collapseSidebar;
+    }
+}
