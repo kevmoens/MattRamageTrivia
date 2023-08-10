@@ -1,3 +1,37 @@
 ﻿table, th, td {
     border: 1px solid black;
 }
+
+
+.item-user {
+    grid-area: user;
+}
+
+.item-userheader {
+    grid-area: userheader;
+}
+
+.item-game {
+    grid-area: game;
+}
+
+.item-gameheader {
+    grid-area: gameheader;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-areas:
+        'userheader gameheader gameheader'
+        'user game game'
+        'user game game';
+    gap: 3px;
+    background-color: #aaa;
+    padding: 3px;
+}
+
+    .grid-container > div {
+        background-color: rgba(255, 255, 255, 1);
+        text-align: center;
+        padding: 10px 0;
+    }

@@ -2,31 +2,70 @@
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 
 <PageTitle>Settings</PageTitle>
-<td><button @onclick="OnClear">Clear</button></td>
-   
-<input type="text" @bind-value="_name" />
-<button @onclick="OnAdd">Add</button>
 
-<table>
-    <tr>
-        <th>Name</th>
-        <th></th>
-    </tr>    
 
-@foreach (var item in _contestants)
-{
-    <tr>
-        <td>@item.Name</td>
-        <td><button @onclick="() => OnRemove(item)">Remove</button></td>
-    </tr>
-}
-</table>
+
+<div class="grid-container">
+    <div class="item-userheader">
+        <h2>Users</h2>
+    </div>
+    <div class="item-gameheader">
+        <h2>Game</h2>
+    </div>
+    <div class="item-user">
+
+
+        <button @onclick="OnClearUsers">Clear</button>
+
+        <input type="text" @bind-value="_name" />
+        <button @onclick="OnAddUser">Add</button>
+
+        <table>
+            <tr>
+                <th>Name</th>
+                <th></th>
+            </tr>
+
+            @foreach (var item in _contestants)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td><button @onclick="() => OnRemoveUser(item)">Remove</button></td>
+                </tr>
+            }
+        </table>
+
+    </div>
+    <div class="item-game">
+        Number of Rounds <input type="number" @bind-value="NumberOfRounds" min="1" />
+    </div>
+</div>
+
 
 @code {
-
     private List<Contestant> _contestants = new();
     private string _name = string.Empty;
-    async void OnAdd()
+
+    private int _numberOfRounds = 1;
+    public int NumberOfRounds { get { return _numberOfRounds;} set{_numberOfRounds = value; SaveRounds();  } }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var contestants = await localStorage.GetItemAsync<string>("Contestants");
+        if (string.IsNullOrWhiteSpace(contestants) == false)
+        {
+            _contestants = System.Text.Json.JsonSerializer.Deserialize<List<Contestant>>(contestants) ?? new List<Contestant>();
+        }
+
+        var numOfRounds = await localStorage.GetItemAsync<string>("NumberOfRounds");
+
+        if (int.TryParse(numOfRounds, out int numberOfRounds))
+        {
+            _numberOfRounds = numberOfRounds;
+        }
+    }
+
+    async void OnAddUser()
     {
         if (string.IsNullOrWhiteSpace(_name))
         {
@@ -34,24 +73,28 @@
             return;
         }
         _contestants.Add(new Contestant() { Name = _name });
-        await Save();
+        await SaveUsers();
         _name = string.Empty;
         StateHasChanged();
     }
-    async void OnClear()
+    async void OnClearUsers()
     {
         _contestants = new();
-        await Save();
+        await SaveUsers();
         StateHasChanged();
     }
-    async void OnRemove(Contestant contestant)
+    async void OnRemoveUser(Contestant contestant)
     {
         _contestants.Remove(contestant);
-        await Save();
+        await SaveUsers();
         StateHasChanged();
     }
-    async Task Save()
+    async Task SaveUsers()
     {
         await localStorage.SetItemAsync("Contestants", System.Text.Json.JsonSerializer.Serialize(_contestants));
+    }
+    async void SaveRounds()
+    {
+        await localStorage.SetItemAsync("NumberOfRounds", NumberOfRounds.ToString());
     }
 }

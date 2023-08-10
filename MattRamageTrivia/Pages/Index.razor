@@ -10,37 +10,72 @@
         transform: @spinnerContainerTransform;
     }
 </style>
+
+
 <div class="d-flex flex-row flex-wrap">
 
     <div class="spinner-area">
         <button id="spin" @onclick="btnSpin_Click">Spin</button>
-        <span class="arrow"></span>
+        <span class="arrowdown"></span>
         <div class="spinner-container">
-            <div class="one">1</div>
-            <div class="two">2</div>
-            <div class="three">3</div>
-            <div class="four">4</div>
-            <div class="five">5</div>
-            <div class="six">6</div>
-            <div class="seven">7</div>
-            <div class="eight">8</div>
+            <div class="one">250</div>
+            <div class="two">100</div>
+            <div class="three">500</div>
+            <div class="four">50</div>
+            <div class="five">300</div>
+            <div class="six">150</div>
+            <div class="seven">400</div>
+            <div class="eight">350</div>
         </div>
     </div>
 
-    <div class="d-flex flex-column flex-fill">
+    <div class="d-flex flex-column flex-fill mx-5">
         <div class="d-flex flex-column flex-wrap flex-fill justify-content-around">
-            <div class="d-flex flex-grow-1 flex-fill align-items-center">
-                <div class="flex-fill text-center">Kevin</div>
-            </div>
-            <div class="d-flex flex-grow-1 flex-fill align-items-center ">
-                <div class="flex-fill text-center">Everly</div>
-            </div>
+            @foreach (var contestant in _contestants)
+            {
+                <div class="d-flex flex-grow-1 flex-fill align-items-center rcorner m-3" @onclick="() => OnPlayerClick(contestant.Id)">
+
+                    @if (contestant.Id == CurrentContestantTurn)
+                    {
+                        <div class="arrowright"></div>
+                    }
+                    <div class="flex-fill text-center">
+                        <h1><b>@contestant.Name</b></h1>
+                        <br />
+                        <h1><b>@contestant.Score</b></h1>
+                    </div>
+                </div>
+
+            }
+        </div>
+    </div>
+</div>
+
+<div>
+
+    <br />
+    <div class="hover-option-container">
+        <div class="hover-option-item ">
+            <HoverButton style="width:100%" />
+        </div>
+        <div class="hover-option-item ">
+            <HoverButton style="width:100%" />
+        </div>
+
+    </div>
+    <div class="hover-option-container">
+        <div class="hover-option-item ">
+            <HoverButton style="width:100%" />
+        </div>
+        <div class="hover-option-item ">
+            <HoverButton style="width:100%" />
         </div>
     </div>
 </div>
 
 @code {
     private List<Contestant> _contestants = new();
+    private Guid CurrentContestantTurn = Guid.Empty;
     private List<int> numbers = new();
     private double deg = 0;
     private int rotation = 0;
@@ -87,17 +122,52 @@
                 throw new ArgumentOutOfRangeException("degrees");
         }
     }
+    int GetValue(int position)
+    {
+        switch (position)
+        {
+            case 1:
+                return 250;
+            case 2:
+                return 100;
+            case 3:
+                return 500;
+            case 4:
+                return 50;
+            case 5:
+                return 300;
+            case 6:
+                return 150;
+            case 7:
+                return 400;
+            case 8:
+                return 350;
+            default:
+                throw new ArgumentOutOfRangeException("point value");
+
+        }
+    }
+    void OnPlayerClick(Guid id)
+    {
+        CurrentContestantTurn = id;
+        StateHasChanged();
+    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender)
         {
             return;
         }
+
+        var currentContestantTurn = await localStorage.GetItemAsync<string>("CurrentContestantTurn");
+        Guid.TryParse(currentContestantTurn, out CurrentContestantTurn);
+
         var contestants = await localStorage.GetItemAsync<string>("Contestants");
         if (string.IsNullOrWhiteSpace(contestants))
         {
             return;
         }
         _contestants = System.Text.Json.JsonSerializer.Deserialize<List<Contestant>>(contestants) ?? new List<Contestant>();
+        StateHasChanged();
     }
 }

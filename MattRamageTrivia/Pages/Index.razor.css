@@ -3,7 +3,7 @@
 }
 
 .spinner-area {
-    margin: 0;
+    margin: 10px;
     padding: 0;
     display: flex;
     align-items: center;
@@ -83,16 +83,27 @@
         transform: rotate(315deg);
     }
 
-.arrow {
+.arrowdown {
     position: absolute;
     top: 100px;
     color: #000;
 }
 
-    .arrow::before {
+    .arrowdown::before {
         content: "\1F817";
         font-size: 50px;
     }
+
+.arrowright {
+    width:20px;
+    color: #000;
+}
+
+    .arrowright::before {
+        content: "\1F81A";
+        font-size: 50px;
+    }
+
 
 #spin {
     position: absolute;
@@ -114,4 +125,32 @@
 
 .player-area {
     height: 100%;
+}
+
+.hover-option-container {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+    align-content: start;
+    
+}
+.hover-option-item {
+    flex: 0 1 calc(40% - 15px);
+    height:173px;
+    width: 300px;
+    margin: 15px;
+}
+.hover-option-item-full {
+    flex: 1 1 100%;
+    height: 173px;
+    width: 300px;
+    margin: 15px;
+}
+
+
+.rcorner {
+    border-radius: 25px;
+    border: 10px solid #73AD21;
 }
