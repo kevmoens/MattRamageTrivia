@@ -1,0 +1,217 @@
+﻿@page "/questions/add"
+@page "/questions/edit/{questionId:int}"
+@inject IWebHostEnvironment Environment
+@inject TriviaRepository repo
+@inject NavigationManager NavigationManager
+<h1>@Title Question</h1>
+<hr />
+<div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary" @onclick="SaveQuestion">Save</button>
+        <button class="btn btn-danger" @onclick="Cancel">Cancel</button>
+    </div>
+    <div class="mb-3">
+        <label for="Text" class="form-label">Question</label>
+        <div class="col-md-8">
+            <textarea class="form-control" name="text" rows="5" cols="10" wrap="soft" @bind="question.Text" />
+        </div>
+    </div>
+    <div class="mb-3">
+        <label for="Image" class="form-label">Image</label>
+        <div class="col-md-4">
+            <img src="data:image;base64,@System.Convert.ToBase64String(question?.Image ?? new byte[] {})" style="max-width:240px;max-height:240px" />
+            <label>
+                <InputFile id="files" OnChange="@LoadFiles" style="visibility:hidden" multiple />
+                <label class="btn btn-primary" for="files">Select file</label>
+            </label>
+            <label>
+
+                <label class="btn btn-primary" @onclick="OnClear">Clear</label>
+            </label>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label for="Difficulty" class="form-label">Difficulty</label>
+        <div class="col-md-1">
+            <InputNumber class="form-control" @bind-Value="question!.Difficulty" />
+        </div>
+    </div>
+</div>
+
+<h2>Options</h2>
+<button class="btn btn-primary" @onclick="OnAddOption">+</button>
+<table class="table table-striped align-middle table-bordered">
+    <thead class="table-success">
+        <tr>
+            <th>Text</th>
+            <th style="width: 400px;">Image</th>
+            <th style="width: 100px;">Is Answer</th>
+            <th style="width: 60px;"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var option in optionList)
+        {
+            <tr>
+                <td>
+                    <div >
+                        <textarea class="form-control" name="text" rows="5" cols="10" wrap="soft" @bind="option.Text" />
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <div>
+
+                            <img src="data:image;base64,@System.Convert.ToBase64String(option?.Image ?? new byte[] {})" style="max-width:240px;max-height:240px" />
+                        </div>
+                        <div>
+
+                            <label>
+                                <InputFile id="optionfiles" OnChange="(arg) => LoadOptionFiles(option!, arg)" style="visibility:hidden" multiple />
+                                <label class="btn btn-primary" for="optionfiles">Select file</label>
+                            </label>
+                            <label>
+
+                                <label class="btn btn-primary" onclick="@(() => OnClearOption(option!))">Clear</label>
+                            </label>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <input type="checkbox" @bind="option.IsAnswer" />
+                </td>
+
+                <td>
+                    <button class="btn btn-outline-danger" @onclick="() => OnDeleteOption(option!)">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+@code {
+    [Parameter]
+    public int questionId { get; set; }
+    protected string Title = "Add";
+    protected Question question = new();
+    protected List<QuestionOption> optionList = new();
+    private bool isLoading;
+    protected override Task OnParametersSetAsync()
+    {
+        if (questionId != 0)
+        {
+            Title = "Edit";
+            question = repo.Questions.Single(q => q.Id == questionId);
+            optionList = repo.QuestionOptions.Where(o => o.QuestionId == questionId).ToList();
+        }
+        return Task.CompletedTask;
+    }
+    private void OnAddOption()
+    {
+        optionList.Add(new QuestionOption());
+    }
+    private void OnDeleteOption(QuestionOption option)
+    {
+        optionList.Remove(option);
+        if (option.QuestionId == questionId && questionId != 0)
+        {            
+            repo.QuestionOptions.Remove(option);
+            repo.SaveChanges();
+        }
+        StateHasChanged();
+    }
+    private void OnClearOption(QuestionOption option)
+    {
+        option.Image = Array.Empty<byte>();
+        StateHasChanged();
+    }
+    protected void SaveQuestion()
+    {
+        if (question.Id != 0)
+        {
+            repo.Questions.Update(question);
+            foreach (var option in optionList)
+            {
+                if (question.Id == 0 || option.QuestionId != question.Id)
+                {
+                    //New
+                    option.QuestionId = question.Id;
+                    repo.QuestionOptions.Add(option);
+                }
+                else
+                {
+                    //Update
+                    repo.QuestionOptions.Update(option);
+                }
+            }
+        }
+        else
+        {
+            repo.Questions.Add(question);
+            repo.SaveChanges();
+            foreach(var option in optionList)
+            {
+                option.QuestionId = question.Id;
+            }
+            repo.QuestionOptions.AddRange(optionList);
+        }
+        repo.SaveChanges();
+        Cancel();
+    }
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        isLoading = true;
+
+        foreach (var file in e.GetMultipleFiles(1))
+        {
+            try
+            {
+                await using MemoryStream ms = new();
+                await file.OpenReadStream().CopyToAsync(ms);
+                question.Image = ms.ToArray();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("File: {Filename} Error: {Error}",
+                    file.Name, ex.Message);
+            }
+        }
+
+        isLoading = false;
+    }
+    private async Task LoadOptionFiles(QuestionOption option, InputFileChangeEventArgs e)
+    {
+        isLoading = true;
+
+        foreach (var file in e.GetMultipleFiles(1))
+        {
+            try
+            {
+                await using MemoryStream ms = new();
+                await file.OpenReadStream().CopyToAsync(ms);
+                option.Image = ms.ToArray();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("File: {Filename} Error: {Error}",
+                    file.Name, ex.Message);
+            }
+        }
+
+        isLoading = false;
+    }
+    private void OnClear()
+    {
+        question.Image = Array.Empty<byte>();
+        StateHasChanged();
+    }
+    public void Cancel()
+    {
+        NavigationManager.NavigateTo("/questions");
+    }
+}

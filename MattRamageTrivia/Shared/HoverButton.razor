@@ -57,7 +57,9 @@
             <span class="icon">
                 <i class="fa fa-universal-access"></i>
             </span>
-            <span class="title">Welcome</span>
+            <span class="title">
+                @ChildContent
+            </span>
         </span>
         <svg viewBox="0 0 @elementWidth @hexBottom" width="@elementWidth" height="@hexBottom" xmlns="http://www.w3.org/2000/svg">
             <polygon points="@hexIndentLeft,@hexTop @hexIndentRight,@hexTop, @hexRight,@hexVertMiddle @hexIndentRight,@hexBottom, @hexIndentLeft, @hexBottom, @hexLeft,@hexVertMiddle" fill="#1e2530" />
@@ -70,6 +72,8 @@
     public string? style { get; set; }
     [Parameter]
     public string Class { get; set; } = string.Empty;
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
     private int hexIndentLeft = 45;
     private int hexIndentRight = 150;
     private int hexLeft = 0;

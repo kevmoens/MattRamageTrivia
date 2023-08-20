@@ -1,5 +1,6 @@
 ﻿@page "/"
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager navMan
 
 <PageTitle>Matt Ramage Trivia</PageTitle>
 
@@ -33,7 +34,7 @@
         <div class="d-flex flex-column flex-wrap flex-fill justify-content-around">
             @foreach (var contestant in _contestants)
             {
-                <div class="d-flex flex-grow-1 flex-fill align-items-center rcorner m-3" @onclick="() => OnPlayerClick(contestant.Id)">
+                <div class="d-flex flex-grow-1 flex-fill align-items-center rcorner m-3">
 
                     @if (contestant.Id == CurrentContestantTurn)
                     {
@@ -50,36 +51,19 @@
         </div>
     </div>
 </div>
-
-<div>
-
-    <br />
-    <div class="hover-option-container">
-        <div class="hover-option-item ">
-            <HoverButton style="width:100%" />
-        </div>
-        <div class="hover-option-item ">
-            <HoverButton style="width:100%" />
-        </div>
-
-    </div>
-    <div class="hover-option-container">
-        <div class="hover-option-item ">
-            <HoverButton style="width:100%" />
-        </div>
-        <div class="hover-option-item ">
-            <HoverButton style="width:100%" />
-        </div>
-    </div>
-</div>
+@if (amount > 0)
+{    
+<button class="btn btn-outline-primary" @onclick="PlayRound">Play Round</button>
+}
 
 @code {
     private List<Contestant> _contestants = new();
     private Guid CurrentContestantTurn = Guid.Empty;
-    private List<int> numbers = new();
+    private int amount = 0;
     private double deg = 0;
     private int rotation = 0;
     private string? spinnerContainerTransform => $"rotate({rotation}deg)";
+
     void btnSpin_Click()
     {
         var rnd = new Random();
@@ -88,7 +72,7 @@
         change -= (int)diff;
         rotation += change;
         deg = System.Math.IEEERemainder(rotation, 360.0);
-        numbers.Add(GetNumber(deg));
+        amount = GetValue(GetNumber(deg));
         StateHasChanged();
     }
     int GetNumber(double deg)
@@ -147,10 +131,9 @@
 
         }
     }
-    void OnPlayerClick(Guid id)
+    void PlayRound()
     {
-        CurrentContestantTurn = id;
-        StateHasChanged();
+        navMan.NavigateTo($"/round/{CurrentContestantTurn}/{amount}");
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -168,6 +151,10 @@
             return;
         }
         _contestants = System.Text.Json.JsonSerializer.Deserialize<List<Contestant>>(contestants) ?? new List<Contestant>();
+        if (CurrentContestantTurn == Guid.Empty && _contestants.Count > 0 || _contestants.Any(c => c.Id == CurrentContestantTurn) == false)
+        {
+            CurrentContestantTurn = _contestants.First().Id;
+        }
         StateHasChanged();
     }
 }

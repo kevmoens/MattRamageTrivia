@@ -1,7 +1,92 @@
-﻿@page "/round"
+﻿@page "/round/{playerId}/{amount:int}"
+@inject TriviaRepository repo
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager navMan
 
-<h3>Round</h3>
+<h2>@contestant?.Name</h2>
+<h4>Question Points: @amount</h4>
+<div>
+
+    <br />
+    <h3 style="max-width: 80%; margin-left: 30px;">@question?.Text</h3>
+    @foreach (var row in rows)
+    {
+        <div class="hover-option-container">
+            <div class="hover-option-item" @onclick="()=> OnSelectedChoice(options[row * 2])">
+                <HoverButton style="width:100%">
+                    @options[(row * 2)].Text
+                </HoverButton>
+            </div>
+            @if (options.Count > row * 2 + 1)
+            {
+                <div class="hover-option-item" @onclick="()=> OnSelectedChoice(options[row * 2 + 1])">
+                    <HoverButton style="width:100%">
+                        @options[(row * 2) + 1].Text
+                    </HoverButton>
+                </div>
+            }
+        </div>
+    }
+</div>
 
 @code {
+    [Parameter]
+    public string playerId { get; set; } = string.Empty;
+    [Parameter]
+    public int amount { get; set; } = 0;
+    private List<int> rows = new();
+    private Question? question;
+    private List<QuestionOption> options = new();
+    List<Contestant> contestantsList = new();
+    Contestant? contestant;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
 
+        var contestants = await localStorage.GetItemAsync<string>("Contestants");
+        if (string.IsNullOrWhiteSpace(contestants))
+        {
+            return;
+        }
+        contestantsList = System.Text.Json.JsonSerializer.Deserialize<List<Contestant>>(contestants) ?? new List<Contestant>();
+        contestant = contestantsList.Where(c => c.Id == Guid.Parse(playerId)).FirstOrDefault();
+        if (contestant == null)
+        {
+            //Show Error
+            return;
+        }
+
+        Random rnd = new();
+        int questionId = rnd.Next(2, 4);
+        question = repo.Questions.Where(q => q.Id == questionId).First();
+        options = repo.QuestionOptions.Where(o => o.QuestionId == questionId).ToList();
+        rows.Clear();
+        for ( int i = 0; i < (int)(options!.Count / 2); i++)
+        {
+            rows.Add(i);
+        }
+        StateHasChanged();
+    }
+    async void OnSelectedChoice(QuestionOption option)
+    {
+        if (option.IsAnswer)
+        {
+            contestant!.Score += amount;
+            await localStorage.SetItemAsync("Contestants", System.Text.Json.JsonSerializer.Serialize(contestantsList));
+        }
+        //Find Next Player
+        int idx = contestantsList.IndexOf(contestant!);
+        if (idx == contestantsList.Count -1)
+        {            
+            await localStorage.SetItemAsync("CurrentContestantTurn", contestantsList[0].Id.ToString());
+        } else
+        {
+            await localStorage.SetItemAsync("CurrentContestantTurn", contestantsList[idx + 1].Id.ToString());
+        }
+        
+        navMan.NavigateTo("/");
+    }
 }

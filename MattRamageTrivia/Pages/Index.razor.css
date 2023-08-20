@@ -44,42 +44,42 @@
     }
 
     .spinner-container .one {
-        background-color: #3f51b5;
+        background-color: #203731;
         left: 50%;
     }
 
     .spinner-container .two {
-        background-color: #ff9800;
+        background-color: #ffb612;
         transform: rotate(45deg);
     }
 
     .spinner-container .three {
-        background-color: #e91e63;
+        background-color: #203731;
         transform: rotate(90deg);
     }
 
     .spinner-container .four {
-        background-color: #4caf50;
+        background-color: #ffb612;
         transform: rotate(135deg);
     }
 
     .spinner-container .five {
-        background-color: #009688;
+        background-color: #203731;
         transform: rotate(180deg);
     }
 
     .spinner-container .six {
-        background-color: #795548;
+        background-color: #ffb612;
         transform: rotate(225deg);
     }
 
     .spinner-container .seven {
-        background-color: #9c27b0;
+        background-color: #203731;
         transform: rotate(270deg);
     }
 
     .spinner-container .eight {
-        background-color: #f44336;
+        background-color: #ffb612;
         transform: rotate(315deg);
     }
 
@@ -152,5 +152,5 @@
 
 .rcorner {
     border-radius: 25px;
-    border: 10px solid #73AD21;
+    border: 10px solid #203731;
 }
