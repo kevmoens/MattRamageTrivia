@@ -8,6 +8,7 @@ namespace MattRamageTrivia.Models.Data
         public string Text { get; set; } = string.Empty;
         public byte[]? Image { get; set; }
         public int Difficulty { get; set; } = 0;
+        public bool Used { get; set; } = false;
 
         public virtual ICollection<QuestionOption> Options { get; set; } = new List<QuestionOption>();
     }

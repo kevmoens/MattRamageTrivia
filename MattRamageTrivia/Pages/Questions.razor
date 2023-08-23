@@ -10,6 +10,9 @@
             Add Question
         </a>
     </div>
+    <div>
+        <button class="btn btn-info" @onclick="OnResetUsed">Reset Used</button>
+    </div>
     <div class="input-group col">
         <input type="text" class="form-control" placeholder="Search Questions"
         @bind="SearchString" @bind:event="oninput" @onkeyup="FilterQuestion" />
@@ -23,6 +26,7 @@
         }
     </div>
 </div>
+
 <br />
 @if (questionList == null)
 {
@@ -91,6 +95,15 @@ else
     protected void DeleteConfirm(int questionID)
     {
         question = questionList!.FirstOrDefault(x => x.Id == questionID);
+    }
+    void OnResetUsed()
+    {
+        foreach (var q in repo.Questions.ToList())
+        {
+            q.Used = false;
+            repo.Questions.Update(q);
+        }
+        repo.SaveChanges();
     }
     public void ResetSearch()
     {

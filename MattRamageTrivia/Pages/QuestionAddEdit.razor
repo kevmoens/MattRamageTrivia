@@ -67,8 +67,7 @@
                         <div>
 
                             <label>
-                                <InputFile id="optionfiles" OnChange="(arg) => LoadOptionFiles(option!, arg)" style="visibility:hidden" multiple />
-                                <label class="btn btn-primary" for="optionfiles">Select file</label>
+                                <InputFile id="optionfiles" OnChange="(arg) => LoadOptionFiles(option!, arg)" multiple />
                             </label>
                             <label>
 
@@ -180,7 +179,7 @@
                     file.Name, ex.Message);
             }
         }
-
+        StateHasChanged();
         isLoading = false;
     }
     private async Task LoadOptionFiles(QuestionOption option, InputFileChangeEventArgs e)
@@ -202,7 +201,7 @@
                     file.Name, ex.Message);
             }
         }
-
+        StateHasChanged();
         isLoading = false;
     }
     private void OnClear()

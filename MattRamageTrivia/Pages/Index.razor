@@ -151,7 +151,7 @@
             return;
         }
         _contestants = System.Text.Json.JsonSerializer.Deserialize<List<Contestant>>(contestants) ?? new List<Contestant>();
-        if (CurrentContestantTurn == Guid.Empty && _contestants.Count > 0 || _contestants.Any(c => c.Id == CurrentContestantTurn) == false)
+        if ((CurrentContestantTurn == Guid.Empty || _contestants.Any(c => c.Id == CurrentContestantTurn) == false) && _contestants.Count > 0)
         {
             CurrentContestantTurn = _contestants.First().Id;
         }
