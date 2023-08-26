@@ -1,0 +1,33 @@
+﻿@page "/video/{VideoUrl}"
+@inject NavigationManager navMan
+@inject IJSRuntime JSRuntime
+
+<video style="max-height: 100vh; top: 50%; left: 50%; position: absolute; transform: translate(-50%, 0%);" src="@VideoUrl" id="myVideo" autoplay>
+    video not supported
+</video>
+
+@code {
+    [Parameter]
+    public string? VideoUrl { get; set; }
+    private DotNetObjectReference<Video>? dotNetHelper;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("addVideoEndedEventListener", "myVideo");
+            dotNetHelper = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("VideoHelpers.setDotNetHelper",
+                dotNetHelper);
+        }
+    }
+
+    [JSInvokable]
+    public void VideoEnded()
+    {
+        navMan.NavigateTo("/");
+    }
+    public void Dispose()
+    {
+        dotNetHelper?.Dispose();
+    }
+}

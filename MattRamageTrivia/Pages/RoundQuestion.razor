@@ -43,7 +43,8 @@
                         @if (options[(row * 2) + 1].Image?.Length > 0)
                         {
                             <img src="data:image;base64,@System.Convert.ToBase64String(options[(row * 2) + 1].Image ?? new byte[] {})" style="max-width:50vw;max-height:25vh" />
-                        } else
+                        }
+                        else
                         {
                             @options[(row * 2) + 1].Text
                         }
@@ -102,9 +103,11 @@
         question!.Used = true;
         repo.Questions.Update(question!);
         repo.SaveChanges();
+        string result = "Wrong.mp4";
         if (option.IsAnswer)
         {
             contestant!.Score += amount;
+            result = "Correct.mp4";
             await localStorage.SetItemAsync("Contestants", System.Text.Json.JsonSerializer.Serialize(contestantsList));
         }
         //Find Next Player
@@ -118,6 +121,8 @@
             await localStorage.SetItemAsync("CurrentContestantTurn", contestantsList[idx + 1].Id.ToString());
         }
 
-        navMan.NavigateTo("/");
+
+        navMan.NavigateTo($"/video/{result}");
+
     }
 }

@@ -34,7 +34,7 @@
     .hexagon-item:hover {
         z-index: 1;
     }
-
+/*
         .hexagon-item:hover .hex-item:last-child {
             opacity: 1;
             -webkit-transform: scale(1.2);
@@ -52,7 +52,7 @@
             -o-transform: scale(1.2);
             transform: scale(1.2);
         }
-
+*/
             .hexagon-item:hover .hex-item:first-child div:after {
                 height: 5px;
             }
