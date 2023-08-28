@@ -8,7 +8,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 700px;
+    height: calc(100vh - 150px - 50px);
     width: 500px;
     overflow: hidden;
 }
@@ -44,42 +44,42 @@
     }
 
     .spinner-container .one {
-        background-color: #203731;
+        background-color: var(--trivia-green);
         left: 50%;
     }
 
     .spinner-container .two {
-        background-color: #ffb612;
+        background-color: var(--trivia-yellow);
         transform: rotate(45deg);
     }
 
     .spinner-container .three {
-        background-color: #203731;
+        background-color: var(--trivia-green);
         transform: rotate(90deg);
     }
 
     .spinner-container .four {
-        background-color: #ffb612;
+        background-color: var(--trivia-yellow);
         transform: rotate(135deg);
     }
 
     .spinner-container .five {
-        background-color: #203731;
+        background-color: var(--trivia-green);
         transform: rotate(180deg);
     }
 
     .spinner-container .six {
-        background-color: #ffb612;
+        background-color: var(--trivia-yellow);
         transform: rotate(225deg);
     }
 
     .spinner-container .seven {
-        background-color: #203731;
+        background-color: var(--trivia-green);
         transform: rotate(270deg);
     }
 
     .spinner-container .eight {
-        background-color: #ffb612;
+        background-color: var(--trivia-yellow);
         transform: rotate(315deg);
     }
 
@@ -152,5 +152,41 @@
 
 .rcorner {
     border-radius: 25px;
-    border: 10px solid #203731;
+    border: 10px solid var(--trivia-green);
 }
+
+.btn-outline-trivia {
+    color: var(--trivia-green);
+    border-color: var(--trivia-green);
+}
+
+    .btn-outline-trivia:hover {
+        color: #fff;
+        background-color: var(--trivia-green);
+        border-color: #007bff
+    }
+
+    .btn-outline-trivia.focus,
+    .btn-outline-trivia:focus {
+        box-shadow: 0 0 0 .2rem rgba(0,123,255,.5)
+    }
+
+    .btn-outline-trivia.disabled,
+    .btn-outline-trivia:disabled {
+        color: var(--trivia-green);
+        background-color: transparent
+    }
+
+    .btn-outline-trivia:not(:disabled):not(.disabled).active,
+    .btn-outline-trivia:not(:disabled):not(.disabled):active, .show >
+    .btn-outline-trivia.dropdown-toggle {
+        color: #fff;
+        background-color: var(--trivia-green);
+        border-color: var(--trivia-green)
+    }
+
+        .btn-outline-trivia:not(:disabled):not(.disabled).active:focus,
+        .btn-outline-trivia:not(:disabled):not(.disabled):active:focus, .show >
+        .btn-outline-trivia.dropdown-toggle:focus {
+            box-shadow: 0 0 0 .2rem rgba(0,123,255,.5)
+        }

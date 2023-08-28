@@ -50,11 +50,15 @@
             }
         </div>
     </div>
+
+    @if (amount > 0)
+    {
+        <button class="btn btn-outline-trivia" style="position: absolute; left: 10px; bottom: 10px;" @onclick="PlayRound">
+            Play Round
+        </button>
+    }
+    <img src="Kwik-Trip-Logo.jpg" style="position: absolute; left: 250px; bottom: 10px; max-height: 50px;" />
 </div>
-@if (amount > 0)
-{    
-<button class="btn btn-outline-primary" @onclick="PlayRound">Play Round</button>
-}
 
 @code {
     private List<Contestant> _contestants = new();
