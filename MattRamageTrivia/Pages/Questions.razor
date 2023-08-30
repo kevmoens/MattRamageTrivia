@@ -20,7 +20,7 @@
         {
             <div class="input-group-append">
                 <button class="btn btn-danger" @onclick="ResetSearch">
-                    <i class="fas fa-times"></i>
+                    <i class="fas fa-times">Reset</i>
                 </button>
             </div>
         }
@@ -51,7 +51,10 @@ else
                     <td>@quest.Id</td>
                     <td>@quest.Text</td>
                     <td>
-                        <img src="data:image;base64,@System.Convert.ToBase64String(quest?.Image ?? new byte[] {})" style="max-width:240px;max-height:240px" />
+                        @if ((quest?.Image ?? Array.Empty<byte>()) != Array.Empty<byte>())
+                        {
+                            <img src="data:image;base64,@System.Convert.ToBase64String(quest?.Image ?? Array.Empty<byte>())" style="max-width:240px;max-height:240px" />
+                        }
                     </td>
                     <td>@quest!.Difficulty</td>
 
@@ -83,13 +86,14 @@ else
     {
         if (!string.IsNullOrEmpty(SearchString))
         {
-            questionList = searchQuestionData
-                .Where(x => x.Text.IndexOf(SearchString, StringComparison.OrdinalIgnoreCase) != -1)
+            questionList = repo.Questions
+                .AsEnumerable()
+                .Where(x => x.Text.Contains(SearchString, StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
         }
         else
         {
-            questionList = searchQuestionData;
+            questionList = repo.Questions.ToList();
         }
     }
     protected void DeleteConfirm(int questionID)
@@ -108,6 +112,6 @@ else
     public void ResetSearch()
     {
         SearchString = string.Empty;
-        questionList = searchQuestionData;
+        questionList = repo.Questions.ToList();
     }
 }
