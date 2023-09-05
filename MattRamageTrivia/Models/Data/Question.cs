@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Xml.Serialization;
 
 namespace MattRamageTrivia.Models.Data
 {
@@ -10,6 +11,9 @@ namespace MattRamageTrivia.Models.Data
         public int Difficulty { get; set; } = 0;
         public bool Used { get; set; } = false;
 
+        [XmlIgnore]
         public virtual ICollection<QuestionOption> Options { get; set; } = new List<QuestionOption>();
+        [NotMapped] //Used for XML Serializeation
+        public List<QuestionOption> ListOptions { get; set; } = new List<QuestionOption>();  
     }
 }

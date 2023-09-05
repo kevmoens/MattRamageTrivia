@@ -104,6 +104,12 @@
             Title = "Edit";
             question = repo.Questions.Single(q => q.Id == questionId);
             optionList = repo.QuestionOptions.Where(o => o.QuestionId == questionId).ToList();
+        } else
+        {
+            optionList.Add(new QuestionOption());
+            optionList.Add(new QuestionOption());
+            optionList.Add(new QuestionOption());
+            optionList.Add(new QuestionOption());
         }
         return Task.CompletedTask;
     }

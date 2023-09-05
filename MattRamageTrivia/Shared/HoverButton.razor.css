@@ -58,7 +58,7 @@
             }
 
         .hexagon-item:hover .hex-item div::after {
-            background-color: #00ff37;
+            background-color: var(--trivia-yellow);
         }
 
 
@@ -99,7 +99,7 @@
     }
 
         .hex-item div::after {
-            background-color: #1e2530;
+            background-color: var(--trivia-green);
             content: "";
             position: absolute;
             width: 100%;

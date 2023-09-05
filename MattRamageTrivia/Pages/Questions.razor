@@ -1,18 +1,28 @@
 ﻿@page "/questions"
 @inject TriviaRepository repo
+@inject IJSRuntime JSRuntime
+@inject MattRamageTrivia.Models.QuestionExportImport.Import import
 
 <h3>Questions</h3>
 
-<div class="row">
-    <div class="col-md-6">
+<div class="d-flex justify-content-start">
+    <div class="pt-2 pe-2">
         <a href='/questions/add' class="btn btn-primary" role="button">
             <i class="fas fa-user-plus"></i>
             Add Question
         </a>
     </div>
-    <div>
+    <div class="p-2">
         <button class="btn btn-info" @onclick="OnResetUsed">Reset Used</button>
     </div>
+    <div class="p-2">
+        <button class="btn btn-info" @onclick="OnExport">Export</button>
+    </div>
+    <div class="p-2">
+        Import <InputFile class="btn btn-info" OnChange="OnImport">Import</InputFile>
+    </div>
+</div>
+<div class="row">
     <div class="input-group col">
         <input type="text" class="form-control" placeholder="Search Questions"
         @bind="SearchString" @bind:event="oninput" @onkeyup="FilterQuestion" />
@@ -49,6 +59,7 @@ else
             {
                 <tr>
                     <td>@quest.Id</td>
+
                     <td>@quest.Text</td>
                     <td>
                         @if ((quest?.Image ?? Array.Empty<byte>()) != Array.Empty<byte>())
@@ -114,4 +125,37 @@ else
         SearchString = string.Empty;
         questionList = repo.Questions.ToList();
     }
+    async void OnExport()
+    {
+        // Generate a text file
+        // serialize repo.Questions to XML text
+        Type tyListQuestion = typeof(List<Question>);
+        var xmlSerializer = new System.Xml.Serialization.XmlSerializer(tyListQuestion);
+        using var stringWriter = new System.IO.StringWriter();
+        var questions = repo.Questions.ToList();
+        foreach (var question in questions)
+        {
+            question.ListOptions = repo.QuestionOptions.Where(o => o.QuestionId == question.Id).ToList();
+        }
+        xmlSerializer.Serialize(stringWriter, questions);
+        string xmlText = stringWriter.ToString();
+        byte[] file = System.Text.Encoding.UTF8.GetBytes(xmlText);
+        await JSRuntime.InvokeVoidAsync("downloadFile", "Trivia.xml", "text/plain", file);
+    }
+
+    async Task OnImport(InputFileChangeEventArgs e)
+    {
+        await import.ImportFile(e);
+        
+        UpdateSearchAndList();
+    }
+
+    private void UpdateSearchAndList()
+    {
+        SearchString = string.Empty;
+        questionList = repo.Questions.ToList();
+        StateHasChanged();
+    }
+
+
 }

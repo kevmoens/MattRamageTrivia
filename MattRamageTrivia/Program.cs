@@ -11,6 +11,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddDbContext<TriviaRepository>(options => options.UseSqlite("Trivia.sqlite"));
+builder.Services.AddTransient<MattRamageTrivia.Models.QuestionExportImport.Import>();
 
 var app = builder.Build();
 

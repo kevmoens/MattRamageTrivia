@@ -102,12 +102,13 @@
     }
     async void OnSelectedChoice(QuestionOption option)
     {
-        question!.Used = true;
-        repo.Questions.Update(question!);
-        repo.SaveChanges();
         string result = "Wrong.mp4";
         if (option.IsAnswer)
         {
+            question!.Used = true;
+            repo.Questions.Update(question!);
+            repo.SaveChanges();
+
             contestant!.Score += amount;
             result = "Correct.mp4";
             await localStorage.SetItemAsync("Contestants", System.Text.Json.JsonSerializer.Serialize(contestantsList));
