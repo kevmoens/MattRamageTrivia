@@ -1,5 +1,6 @@
 ﻿@page "/settings"
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Settings</PageTitle>
 
@@ -17,8 +18,8 @@
 
         <button @onclick="OnClearUsers">Clear</button>
 
-        <input type="text" @bind-value="_name" />
-        <button @onclick="OnAddUser">Add</button>
+        <input type="text" @bind="_name" @bind:event="oninput" @onkeydown="Enter" @ref="nameElement" />
+        <button @onclick="OnAddUser" >Add</button>
 
         <table>
             <tr>
@@ -43,12 +44,19 @@
 
 
 @code {
+    private ElementReference nameElement;
     private List<Contestant> _contestants = new();
     private string _name = string.Empty;
 
     private int _numberOfRounds = 1;
     public int NumberOfRounds { get { return _numberOfRounds;} set{_numberOfRounds = value; SaveRounds();  } }
-
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await nameElement.FocusAsync();
+        }
+    }
     protected override async Task OnInitializedAsync()
     {
         var contestants = await localStorage.GetItemAsync<string>("Contestants");
@@ -64,18 +72,25 @@
             _numberOfRounds = numberOfRounds;
         }
     }
-
-    async void OnAddUser()
+    public async void Enter(KeyboardEventArgs e)
     {
+        if (e.Code == "Enter" || e.Code == "NumpadEnter")
+        {
+            await OnAddUser();
+        }
+    }
+    async Task OnAddUser()
+    {
+        //todo why is _name nothing if I hit enter
         if (string.IsNullOrWhiteSpace(_name))
         {
-
             return;
         }
         _contestants.Add(new Contestant() { Name = _name });
         await SaveUsers();
         _name = string.Empty;
         StateHasChanged();
+        await nameElement.FocusAsync();
     }
     async void OnClearUsers()
     {
