@@ -3,23 +3,35 @@
 @inject IJSRuntime JSRuntime
 
 <PageTitle>Matt Ramage Trivia</PageTitle>
+<div class="video-container">
 
-<video style="max-height: 100vh; top: 50%; left: 50%; position: absolute; transform: translate(-50%, 0%);" src="@VideoUrl" id="myVideo" autoplay>
-    video not supported
-</video>
+    <video class="video-result" src="@VideoUrl" id="myVideo" autoplay>
+        video not supported
+    </video>
+    <div class="center-result blinker" >
+        @Message
+    </div>
+</div>
 
 @code {
     [Parameter]
     public string? VideoUrl { get; set; }
+    private string Message { get; set; } = "CORRECT";
     private DotNetObjectReference<Video>? dotNetHelper;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            if (VideoUrl?.ToLower()?.StartsWith("wrong") ?? false)
+            {
+                Message = "WRONG";
+                StateHasChanged();
+            }
             await JSRuntime.InvokeVoidAsync("addVideoEndedEventListener", "myVideo");
             dotNetHelper = DotNetObjectReference.Create(this);
             await JSRuntime.InvokeVoidAsync("VideoHelpers.setDotNetHelper",
                 dotNetHelper);
+
         }
     }
 
