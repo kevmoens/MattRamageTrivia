@@ -185,6 +185,8 @@
         display: block;
         font-family: "Open Sans", sans-serif;
         font-size: 14px;
+        font-weight: bolder;
+        color: var(--foreground-button);
         letter-spacing: 1px;
         line-height: 24px;
         text-transform: uppercase;
