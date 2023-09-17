@@ -4,6 +4,7 @@
 @inject NavigationManager navMan
 
 <PageTitle>Matt Ramage Trivia</PageTitle>
+<div style="margin-left: 3rem;">
 
 <h2>@contestant?.Name</h2>
 <h4>Question Points: @amount</h4>
@@ -57,6 +58,7 @@
     }
 </div>
 
+</div>
 @code {
     [Parameter]
     public string playerId { get; set; } = string.Empty;
@@ -88,7 +90,25 @@
         }
 
         Random rnd = new();
-        List<int> questionIds = repo.Questions.Where(q => q.Used == false).Select(q => q.Id).ToList();
+        List<int> questionIds;
+        //Try to get a question based on weight
+        questionIds = repo.Questions.Where(q => q.Used == false
+                                                && (amount >= 400 && q.Difficulty >= 7 || amount < 150 && q.Difficulty <= 3))
+                          .Select(q => q.Id)
+                          .ToList();
+        if (questionIds == null || questionIds.Count == 0)
+        {
+            questionIds = repo.Questions.Where(q => q.Used == false 
+                                                    && (amount >= 250 && q.Difficulty > 5 || amount < 250 && q.Difficulty <= 5))
+                              .Select(q => q.Id)
+                              .ToList();
+        }
+        if (questionIds == null || questionIds.Count == 0)
+        {
+            questionIds = repo.Questions.Where(q => q.Used == false)
+                              .Select(q => q.Id)
+                              .ToList();
+        }
         int questionIdx = rnd.Next(0, questionIds.Count);
         int questionId = questionIds[questionIdx];
         question = repo.Questions.Where(q => q.Id == questionId).First();
@@ -102,7 +122,9 @@
     }
     async void OnSelectedChoice(QuestionOption option)
     {
-        string result = "Wrong.mp4";
+        Random random = new Random();
+        int vidNum = random.Next(1, 4);
+        string result = $"Wrong{vidNum}.mp4";
         if (option.IsAnswer)
         {
             question!.Used = true;
@@ -110,7 +132,7 @@
             repo.SaveChanges();
 
             contestant!.Score += amount;
-            result = "Correct.mp4";
+            result = $"Correct{vidNum}.mp4";
             await localStorage.SetItemAsync("Contestants", System.Text.Json.JsonSerializer.Serialize(contestantsList));
         }
         //Find Next Player

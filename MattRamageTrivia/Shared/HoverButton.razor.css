@@ -184,7 +184,7 @@
     .hex-content .title {
         display: block;
         font-family: "Open Sans", sans-serif;
-        font-size: 14px;
+        font-size: 20px;
         font-weight: bolder;
         color: var(--foreground-button);
         letter-spacing: 1px;
