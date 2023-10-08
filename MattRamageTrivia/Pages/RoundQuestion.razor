@@ -5,9 +5,9 @@
 
 <PageTitle>Matt Ramage Trivia</PageTitle>
 <div style="margin-left: 3rem;">
-
+@*
 <h2>@contestant?.Name</h2>
-<h4>Question Points: @amount</h4>
+<h4>Question Points: @amount</h4>*@
 <div>
     @if (question?.Image?.Length > 0)
     {
@@ -64,6 +64,8 @@
     public string playerId { get; set; } = string.Empty;
     [Parameter]
     public int amount { get; set; } = 0;
+
+    private Hub hub = Hub.Default;
     private List<int> rows = new();
     private Question? question;
     private List<QuestionOption> options = new();
@@ -75,8 +77,7 @@
         {
             return;
         }
-
-        var contestants = await localStorage.GetItemAsync<string>("Contestants");
+    var contestants = await localStorage.GetItemAsync<string>("Contestants");
         if (string.IsNullOrWhiteSpace(contestants))
         {
             return;
@@ -89,6 +90,7 @@
             return;
         }
 
+        await hub.PublishAsync<TopRowNameInfo>(new TopRowNameInfo() { Name = contestant?.Name, Amount = amount.ToString(), Show = true });
         Random rnd = new();
         List<int> questionIds;
         //Try to get a question based on weight
@@ -122,6 +124,8 @@
     }
     async void OnSelectedChoice(QuestionOption option)
     {
+
+        hub.Publish<TopRowNameInfo>(new TopRowNameInfo() { Name = "", Amount = "", Show = false });
         Random random = new Random();
         int vidNum = random.Next(1, 4);
         string result = $"Wrong{vidNum}.mp4";

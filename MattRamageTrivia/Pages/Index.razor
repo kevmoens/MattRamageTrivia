@@ -60,7 +60,9 @@
     <img src="Kwik-Trip-Logo.jpg" style="position: absolute; left: 250px; bottom: 10px; max-height: 50px;" />
 </div>
 
+
 @code {
+    private Hub hub = Hub.Default;
     private List<Contestant> _contestants = new();
     private Guid CurrentContestantTurn = Guid.Empty;
     private int amount = 0;
@@ -145,6 +147,8 @@
         {
             return;
         }
+
+        hub.Publish<TopRowNameInfo>(new TopRowNameInfo() { Name = "", Amount = "", Show = false });
 
         var currentContestantTurn = await localStorage.GetItemAsync<string>("CurrentContestantTurn");
         Guid.TryParse(currentContestantTurn, out CurrentContestantTurn);
