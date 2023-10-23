@@ -5,5 +5,7 @@
         public required string Name { get; set; }
         public required string Amount { get; set; }
         public bool Show { get; set; }
+
+        public int? Round { get; set; } 
     }
 }

@@ -71,13 +71,15 @@
     private List<QuestionOption> options = new();
     List<Contestant> contestantsList = new();
     Contestant? contestant;
+    private int _currentRound = 1;
+    public int CurrentRound { get { return _currentRound; } set { _currentRound = value; } }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender)
         {
             return;
         }
-    var contestants = await localStorage.GetItemAsync<string>("Contestants");
+        var contestants = await localStorage.GetItemAsync<string>("Contestants");
         if (string.IsNullOrWhiteSpace(contestants))
         {
             return;
@@ -90,7 +92,14 @@
             return;
         }
 
-        await hub.PublishAsync<TopRowNameInfo>(new TopRowNameInfo() { Name = contestant?.Name, Amount = amount.ToString(), Show = true });
+        var curRound = await localStorage.GetItemAsync<string>("CurrentRound");
+
+        if (int.TryParse(curRound, out int currentRound))
+        {
+            _currentRound = currentRound;
+        }
+
+        await hub.PublishAsync<TopRowNameInfo>(new TopRowNameInfo() { Name = contestant?.Name, Amount = amount.ToString(), Show = true, Round = _currentRound });
         Random rnd = new();
         List<int> questionIds;
         //Try to get a question based on weight
@@ -127,7 +136,7 @@
 
         hub.Publish<TopRowNameInfo>(new TopRowNameInfo() { Name = "", Amount = "", Show = false });
         Random random = new Random();
-        int vidNum = random.Next(1, 4);
+        int vidNum = random.Next(1, 6);
         string result = $"Wrong{vidNum}.mp4";
         if (option.IsAnswer)
         {
@@ -144,6 +153,8 @@
         if (idx == contestantsList.Count - 1)
         {
             await localStorage.SetItemAsync("CurrentContestantTurn", contestantsList[0].Id.ToString());
+            CurrentRound++;
+            await localStorage.SetItemAsync("CurrentRound", CurrentRound.ToString());
         }
         else
         {

@@ -15,18 +15,21 @@
 
 <div class="d-flex flex-row flex-wrap">
 
-    <div class="spinner-area">
-        <button id="spin" @onclick="btnSpin_Click">Spin</button>
-        <span class="arrowdown"></span>
-        <div class="spinner-container">
-            <div class="one">250</div>
-            <div class="two">100</div>
-            <div class="three">500</div>
-            <div class="four">50</div>
-            <div class="five">300</div>
-            <div class="six">150</div>
-            <div class="seven">400</div>
-            <div class="eight">350</div>
+    <div>
+        <span class="roundnum">Round @CurrentRound</span>
+        <div class="spinner-area">
+            <button id="spin" @onclick="btnSpin_Click">Spin</button>
+            <span class="arrowdown"></span>
+            <div class="spinner-container">
+                <div class="one">250</div>
+                <div class="two">100</div>
+                <div class="three">500</div>
+                <div class="four">50</div>
+                <div class="five">300</div>
+                <div class="six">150</div>
+                <div class="seven">400</div>
+                <div class="eight">350</div>
+            </div>
         </div>
     </div>
 
@@ -57,7 +60,7 @@
             Play Round
         </button>
     }
-    <img src="Kwik-Trip-Logo.jpg" style="position: absolute; left: 250px; bottom: 10px; max-height: 50px;" />
+    <img src="Kwik-Trip-Logo.jpg" style="position: absolute; left: 250px; bottom: -50px; max-height: 50px;" />
 </div>
 
 
@@ -65,6 +68,8 @@
     private Hub hub = Hub.Default;
     private List<Contestant> _contestants = new();
     private Guid CurrentContestantTurn = Guid.Empty;
+    private int _currentRound = 1;
+    public int CurrentRound { get { return _currentRound; } set { _currentRound = value; } }
     private int amount = 0;
     private double deg = 0;
     private int rotation = 0;
@@ -163,6 +168,32 @@
         {
             CurrentContestantTurn = _contestants.First().Id;
         }
+
+        var curRound = await localStorage.GetItemAsync<string>("CurrentRound");
+
+        if (int.TryParse(curRound, out int currentRound))
+        {
+            _currentRound = currentRound;
+        }
+
+        var numOfRounds = await localStorage.GetItemAsync<string>("NumberOfRounds");
+
+        if (int.TryParse(numOfRounds, out int numberOfRounds))
+        {
+            if (CurrentRound > numberOfRounds)
+            {
+                int maxScore = _contestants.Max(c => c.Score);
+                if (_contestants.Count(c => c.Score == maxScore) == 1)
+                {
+                    //Only One Person with Max Score
+                    navMan.NavigateTo($"/winner");
+                }
+            }
+        }
         StateHasChanged();
+    }
+    public void OnWinner()
+    {
+        navMan.NavigateTo($"/winner");
     }
 }

@@ -5,6 +5,7 @@ class VideoHelpers {
 
     static setDotNetHelper(value) {
         VideoHelpers.dotNetHelper = value;
+
     }
 
     static async videoEnded() {

@@ -1,0 +1,65 @@
+﻿@page "/winner"
+@using Microsoft.JSInterop
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject IJSRuntime JSRuntime
+
+
+
+<PageTitle>Matt Ramage Trivia</PageTitle>
+<div class="video-container">
+
+    <video class="video-result" src="@VideoUrl" id="myVideo" autoPlay>
+        video not supported
+    </video>
+
+    <div class="center-result blinker">
+    <h1><b>Winner</b></h1>
+
+<h1><b>@_contestant?.Name</b></h1>
+<br />
+<h1><b>@_contestant?.Score</b></h1>
+    </div>
+
+</div>
+@code {
+    public string? VideoUrl { get; set; } = "Winner.mp4";
+    private List<Contestant> _contestants = new();
+    private Contestant? _contestant = null;
+    private DotNetObjectReference<Winner>? dotNetHelper;
+    protected override async void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        var contestants = await localStorage.GetItemAsync<string>("Contestants");
+        if (string.IsNullOrWhiteSpace(contestants))
+        {
+            return;
+        }
+        _contestants = System.Text.Json.JsonSerializer.Deserialize<List<Contestant>>(contestants) ?? new List<Contestant>();
+
+
+        int maxScore = _contestants.Max(c => c.Score);
+        var contestant = _contestants.First(c => c.Score == maxScore);
+        _contestant = contestant;
+
+        await JSRuntime.InvokeVoidAsync("addVideoEndedEventListener", "myVideo");
+        dotNetHelper = DotNetObjectReference.Create(this);
+        await JSRuntime.InvokeVoidAsync("VideoHelpers.setDotNetHelper",
+            dotNetHelper);
+        StateHasChanged();
+
+    }
+
+    [JSInvokable]
+    public void VideoEnded()
+    {
+        
+    }
+    public void Dispose()
+    {
+        dotNetHelper?.Dispose();
+    }
+}

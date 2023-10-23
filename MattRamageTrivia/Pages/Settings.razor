@@ -39,6 +39,10 @@
     </div>
     <div class="item-game">
         Number of Rounds <input type="number" @bind-value="NumberOfRounds" min="1" />
+        <br/>
+        Current Round <input type="number" @bind-value="CurrentRound" min="1" readonly /> 
+        <br/>
+        <button @onclick="OnResetRounds">Reset Rounds</button>
     </div>
 </div>
 
@@ -50,6 +54,8 @@
 
     private int _numberOfRounds = 1;
     public int NumberOfRounds { get { return _numberOfRounds;} set{_numberOfRounds = value; SaveRounds();  } }
+    private int _currentRound = 1;
+    public int CurrentRound {get { return _currentRound; } set { _currentRound = value; } }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -70,6 +76,12 @@
         if (int.TryParse(numOfRounds, out int numberOfRounds))
         {
             _numberOfRounds = numberOfRounds;
+        }
+        var curRound = await localStorage.GetItemAsync<string>("CurrentRound");
+
+        if (int.TryParse(curRound, out int currentRound))
+        {
+            _currentRound = currentRound;
         }
     }
     public async void Enter(KeyboardEventArgs e)
@@ -110,5 +122,11 @@
     async void SaveRounds()
     {
         await localStorage.SetItemAsync("NumberOfRounds", NumberOfRounds.ToString());
+    }
+    async void OnResetRounds()
+    {
+        CurrentRound = 1;
+        await localStorage.SetItemAsync("CurrentRound", CurrentRound.ToString());
+        StateHasChanged();
     }
 }

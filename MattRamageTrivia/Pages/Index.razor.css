@@ -14,6 +14,7 @@ b {
     justify-content: center;
     height: calc(100vh - 150px - 50px);
     width: 500px;
+    height:500px;
     overflow: hidden;
 }
 
@@ -97,6 +98,18 @@ b {
         content: "\1F817";
         font-size: 50px;
     }
+
+
+.roundnum {
+    position: relative;
+    top: -50px;
+    color: #000;    
+    font-size: 30px;
+    height:0px;
+    margin-top: -50px;
+    padding-top: -50px;
+}
+
 
 .arrowright {
     width:20px;

@@ -1,0 +1,39 @@
+﻿.video-container {
+    height: calc(100vh - 150px);
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, 0%);
+}
+
+.video-result {
+    height: calc(100vh - 150px);
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, 0%);
+}
+
+.center-result {
+    height: calc(100vh - 150px);
+    font-size: 80px;
+    font-weight: bolder;
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    text-align: center;
+    justify-content: center;
+    transform: translate(-50%, 0%);
+    z-index: 10;
+}
+
+
+.blinker {
+    animation: blinker 2s linear infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}
