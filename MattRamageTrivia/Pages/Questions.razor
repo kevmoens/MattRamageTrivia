@@ -69,7 +69,13 @@ else
                         }
                     </td>
                     <td>@quest!.Difficulty</td>
-                    <td>@quest!.Used</td>
+                    <td>@quest!.Used 
+                        @if (quest!.Used)
+                        {
+                            <button class="btn btn-outline-primary" @onclick="()=> OnUnused(quest!)" >Reset</button>
+
+                        }
+                    </td>
 
                     <td>
                         <a href='/questions/edit/@quest.Id' class="btn btn-outline-dark" role="button">
@@ -144,7 +150,12 @@ else
         byte[] file = System.Text.Encoding.UTF8.GetBytes(xmlText);
         await JSRuntime.InvokeVoidAsync("downloadFile", "Trivia.xml", "text/plain", file);
     }
-
+    void OnUnused(Question question)
+    {
+        question.Used = false;
+        repo.Questions.Update(question);
+        repo.SaveChanges();
+    }
     async Task OnImport(InputFileChangeEventArgs e)
     {
         await import.ImportFile(e);

@@ -8,16 +8,21 @@
 <PageTitle>Matt Ramage Trivia</PageTitle>
 <div class="video-container">
 
-    <video class="video-result" src="@VideoUrl" id="myVideo" autoPlay>
-        video not supported
-    </video>
+    @if (_media == "video")
+    {
+        <video class="video-result" src="@VideoUrl" id="myVideo" autoPlay>
+            video not supported
+        </video>
+    } else
+    {
+        <img class="image-result" src="Winner.jpg" />
+    }
 
     <div class="center-result blinker">
-    <h1><b>Winner</b></h1>
-
-<h1><b>@_contestant?.Name</b></h1>
-<br />
-<h1><b>@_contestant?.Score</b></h1>
+        <h1><b>Winner</b></h1>
+        <h1><b>@_contestant?.Name</b></h1>
+        <br />
+        <h1><b>@_contestant?.Score</b></h1>
     </div>
 
 </div>
@@ -25,6 +30,7 @@
     public string? VideoUrl { get; set; } = "Winner.mp4";
     private List<Contestant> _contestants = new();
     private Contestant? _contestant = null;
+    private string _media = "image";
     private DotNetObjectReference<Winner>? dotNetHelper;
     protected override async void OnAfterRender(bool firstRender)
     {
@@ -45,10 +51,15 @@
         var contestant = _contestants.First(c => c.Score == maxScore);
         _contestant = contestant;
 
-        await JSRuntime.InvokeVoidAsync("addVideoEndedEventListener", "myVideo");
-        dotNetHelper = DotNetObjectReference.Create(this);
-        await JSRuntime.InvokeVoidAsync("VideoHelpers.setDotNetHelper",
-            dotNetHelper);
+
+        _media = await localStorage.GetItemAsync<string>("ResultsMedia");
+        if (_media == "video") 
+        {
+            await JSRuntime.InvokeVoidAsync("addVideoEndedEventListener", "myVideo");
+            dotNetHelper = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("VideoHelpers.setDotNetHelper",
+                dotNetHelper);
+        }
         StateHasChanged();
 
     }

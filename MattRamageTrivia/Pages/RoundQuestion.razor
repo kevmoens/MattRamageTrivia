@@ -73,6 +73,8 @@
     Contestant? contestant;
     private int _currentRound = 1;
     public int CurrentRound { get { return _currentRound; } set { _currentRound = value; } }
+    private string _media = "Image";
+    public string Media { get { return _media; } set { _media = value; } }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender)
@@ -99,27 +101,12 @@
             _currentRound = currentRound;
         }
 
+        _media = await localStorage.GetItemAsync<string>("ResultsMedia");
+
         await hub.PublishAsync<TopRowNameInfo>(new TopRowNameInfo() { Name = contestant?.Name, Amount = amount.ToString(), Show = true, Round = _currentRound });
         Random rnd = new();
         List<int> questionIds;
-        //Try to get a question based on weight
-        questionIds = repo.Questions.Where(q => q.Used == false
-                                                && (amount >= 400 && q.Difficulty >= 7 || amount < 150 && q.Difficulty <= 3))
-                          .Select(q => q.Id)
-                          .ToList();
-        if (questionIds == null || questionIds.Count == 0)
-        {
-            questionIds = repo.Questions.Where(q => q.Used == false 
-                                                    && (amount >= 250 && q.Difficulty > 5 || amount < 250 && q.Difficulty <= 5))
-                              .Select(q => q.Id)
-                              .ToList();
-        }
-        if (questionIds == null || questionIds.Count == 0)
-        {
-            questionIds = repo.Questions.Where(q => q.Used == false)
-                              .Select(q => q.Id)
-                              .ToList();
-        }
+        questionIds = GetQuestions();
         int questionIdx = rnd.Next(0, questionIds.Count);
         int questionId = questionIds[questionIdx];
         question = repo.Questions.Where(q => q.Id == questionId).First();
@@ -131,22 +118,76 @@
         }
         StateHasChanged();
     }
+    private List<int> GetQuestions()
+    {
+        List<int> questionIds;
+        //Try to get a question based on weight
+        questionIds = repo.Questions.Where(q => q.Used == false 
+                                        && q.AskedThisRound == false
+                                        && (amount >= 400 && q.Difficulty >= 7 || amount < 150 && q.Difficulty <= 3))
+                  .Select(q => q.Id)
+                  .ToList();
+        if (questionIds == null || questionIds.Count == 0)
+        {
+            questionIds = repo.Questions.Where(q => q.Used == false
+                                                    && q.AskedThisRound == false
+                                                    && (amount >= 250 && q.Difficulty > 5 || amount < 250 && q.Difficulty <= 5))
+                              .Select(q => q.Id)
+                              .ToList();
+        }
+        if (questionIds == null || questionIds.Count == 0)
+        {
+            questionIds = repo.Questions.Where(q => q.Used == false
+                                        && q.AskedThisRound == false)
+                              .Select(q => q.Id)
+                              .ToList();
+        }
+
+        if (questionIds == null || questionIds.Count == 0)
+        {
+            questionIds = repo.Questions.Where(q => q.Used == false
+                                                && (amount >= 400 && q.Difficulty >= 7 || amount < 150 && q.Difficulty <= 3))
+                          .Select(q => q.Id)
+                          .ToList();
+        }
+
+        if (questionIds == null || questionIds.Count == 0)
+        {
+            questionIds = repo.Questions.Where(q => q.Used == false
+                                                    && (amount >= 250 && q.Difficulty > 5 || amount < 250 && q.Difficulty <= 5))
+                              .Select(q => q.Id)
+                              .ToList();
+        }
+        if (questionIds == null || questionIds.Count == 0)
+        {
+            questionIds = repo.Questions.Where(q => q.Used == false)
+                              .Select(q => q.Id)
+                              .ToList();
+        }
+
+        return questionIds;
+    }
     async void OnSelectedChoice(QuestionOption option)
     {
 
         hub.Publish<TopRowNameInfo>(new TopRowNameInfo() { Name = "", Amount = "", Show = false });
         Random random = new Random();
-        int vidNum = random.Next(1, 6);
-        string result = $"Wrong{vidNum}.mp4";
+        string result = GetExistFileName("Wrong");
         if (option.IsAnswer)
         {
+            question!.AskedThisRound = true;
             question!.Used = true;
             repo.Questions.Update(question!);
             repo.SaveChanges();
 
             contestant!.Score += amount;
-            result = $"Correct{vidNum}.mp4";
+            result = GetExistFileName("Correct");
             await localStorage.SetItemAsync("Contestants", System.Text.Json.JsonSerializer.Serialize(contestantsList));
+        } else
+        {
+            question!.AskedThisRound = true;
+            repo.Questions.Update(question!);
+            repo.SaveChanges();
         }
         //Find Next Player
         int idx = contestantsList.IndexOf(contestant!);
@@ -162,7 +203,39 @@
         }
 
 
-        navMan.NavigateTo($"/video/{result}");
-
+        navMan.NavigateTo($"/{Media}/{result}");
+    }
+    private string GetExistFileName(string name)
+    {
+        string search = $"{name}*.{GetMediaExtension()}";
+        var basePath = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot");
+        var files = Directory.GetFiles(basePath, search);
+        if (files.Length == 0)
+        {
+            return $"{name}.{GetMediaExtension()}";
+        }
+        int i = 0;
+        string result = string.Empty;
+        while (i < CurrentRound)
+        {
+            for (int j = 0; j < files.Length; j++)
+            {
+                result = files[j];
+                i++;
+                if (i >= CurrentRound)
+                {
+                    break;
+                }
+            }
+        }
+        return result.Substring(basePath.Length + 1);
+    }
+    private string GetMediaExtension()
+    {
+        if (Media == "image")
+        {
+            return "jpg";
+        }
+        return "mp4";
     }
 }

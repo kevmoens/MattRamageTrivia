@@ -1,5 +1,6 @@
 ﻿@page "/settings"
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject TriviaRepository repo
 @inject IJSRuntime JSRuntime
 
 <PageTitle>Settings</PageTitle>
@@ -13,13 +14,16 @@
     <div class="item-gameheader">
         <h2>Game</h2>
     </div>
+    <div class="item-resultsheader">
+        <h2>Round Results</h2>
+    </div>
     <div class="item-user">
 
 
         <button @onclick="OnClearUsers">Clear</button>
 
         <input type="text" @bind="_name" @bind:event="oninput" @onkeydown="Enter" @ref="nameElement" />
-        <button @onclick="OnAddUser" >Add</button>
+        <button @onclick="OnAddUser">Add</button>
 
         <table>
             <tr>
@@ -38,24 +42,61 @@
 
     </div>
     <div class="item-game">
-        Number of Rounds <input type="number" @bind-value="NumberOfRounds" min="1" />
-        <br/>
-        Current Round <input type="number" @bind-value="CurrentRound" min="1" readonly /> 
-        <br/>
+        <table>
+            <tr>
+                <td>Number of Rounds</td>
+                <td><input type="number" @bind-value="NumberOfRounds" min="1" /></td>
+            </tr>
+            <tr>
+                <td>Current Round</td>
+                <td><input type="number" @bind-value="CurrentRound" min="1" readonly /> </td>
+            </tr>
+        </table>
+
         <button @onclick="OnResetRounds">Reset Rounds</button>
+    </div>
+    <div class="item-results">
+
+        <InputRadioGroup @bind-Value="_media">
+            <div>
+                <InputRadio Value="_video" /> Video
+            </div>
+            <div>
+                <InputRadio Value="_image" /> Image
+            </div>
+        </InputRadioGroup>
+
+        <div class="bordered">
+
+        <InputRadioGroup @bind-Value="FileName">
+               <InputRadio Value="_Correct" /> Correct
+                <InputRadio Value="_Wrong" /> Wrong
+        </InputRadioGroup>
+        <InputFile OnChange="@SingleUpload" />
+        </div>
     </div>
 </div>
 
 
 @code {
+    private string _video = "video";
+    private string _image = "image";
+    private string _media = "image";
+    public string Media {get { return _media; } set {_media = value; SaveMedia(); }}
+
+
+    private string _Wrong = "Wrong";
+    private string _Correct = "Correct";
+    private string _fileName = "Correct";
+    public string FileName { get { return _fileName; } set { _fileName = value; } }
     private ElementReference nameElement;
     private List<Contestant> _contestants = new();
     private string _name = string.Empty;
 
     private int _numberOfRounds = 1;
-    public int NumberOfRounds { get { return _numberOfRounds;} set{_numberOfRounds = value; SaveRounds();  } }
+    public int NumberOfRounds { get { return _numberOfRounds; } set { _numberOfRounds = value; SaveRounds(); } }
     private int _currentRound = 1;
-    public int CurrentRound {get { return _currentRound; } set { _currentRound = value; } }
+    public int CurrentRound { get { return _currentRound; } set { _currentRound = value; } }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -82,6 +123,13 @@
         if (int.TryParse(curRound, out int currentRound))
         {
             _currentRound = currentRound;
+        }
+
+        _media = await localStorage.GetItemAsync<string>("ResultsMedia");
+        if (string.IsNullOrEmpty(_media))
+        {
+            Media = "image";
+            StateHasChanged();
         }
     }
     public async void Enter(KeyboardEventArgs e)
@@ -123,10 +171,51 @@
     {
         await localStorage.SetItemAsync("NumberOfRounds", NumberOfRounds.ToString());
     }
+    async void SaveMedia()
+    {
+        await localStorage.SetItemAsync("ResultsMedia", Media.ToString());
+    }
     async void OnResetRounds()
     {
         CurrentRound = 1;
+        foreach (var question in repo.Questions.Where(q => q.AskedThisRound == true))
+        {
+            question.AskedThisRound = false;
+            repo.Questions.Update(question);
+            repo.SaveChanges();
+        }
+
         await localStorage.SetItemAsync("CurrentRound", CurrentRound.ToString());
         StateHasChanged();
+    }
+
+    private async Task SingleUpload(InputFileChangeEventArgs e)
+    {
+        var file = new FileInfo(e.File.Name);
+        if (file.Extension.Trim('.').ToLower() != GetMediaExtension())
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Based on the current media type, the file extension must be {GetMediaExtension()}");
+            return;
+        }
+        var newFileName = GetNextFileName(FileName);
+        MemoryStream ms = new MemoryStream();
+        await e.File.OpenReadStream().CopyToAsync(ms);
+        await File.WriteAllBytesAsync(newFileName, ms.ToArray());
+    }
+
+    private string GetNextFileName(string name)
+    {
+        string search = $"{name}*.{GetMediaExtension()}";
+        var basePath = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot");
+        var files = Directory.GetFiles(basePath, search);
+        return Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot",$"{name}{files.Length + 1}.{GetMediaExtension()}");
+    }
+    private string GetMediaExtension()
+    {
+        if (Media == "image")
+        {
+            return "jpg";
+        }
+        return "mp4";
     }
 }

@@ -19,12 +19,20 @@
     grid-area: gameheader;
 }
 
+.item-results {
+    grid-area: results;
+}
+
+.item-resultsheader {
+    grid-area: resultsheader;
+}
+
 .grid-container {
     display: grid;
     grid-template-areas:
-        'userheader gameheader gameheader'
-        'user game game'
-        'user game game';
+        'userheader gameheader resultsheader'
+        'user game results'
+        'user game results';
     gap: 3px;
     background-color: #aaa;
     padding: 3px;
@@ -35,3 +43,7 @@
         text-align: center;
         padding: 10px 0;
     }
+
+.bordered {
+    border: 1px solid black;
+}

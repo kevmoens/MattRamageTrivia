@@ -2,6 +2,7 @@
 using MattRamageTrivia.Models.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MattRamageTrivia.Migrations
 {
     [DbContext(typeof(TriviaRepository))]
-    partial class TriviaRepositoryModelSnapshot : ModelSnapshot
+    [Migration("20231030023433_AvoidQuestionReuse")]
+    partial class AvoidQuestionReuse
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.10");

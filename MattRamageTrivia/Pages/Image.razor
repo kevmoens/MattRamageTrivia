@@ -1,0 +1,32 @@
+﻿@page "/image/{ImageUrl}"
+@inject NavigationManager navMan
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Matt Ramage Trivia</PageTitle>
+<div class="image-container">
+
+    <img class="image-result" src="@ImageUrl"/>
+    <div class="center-result blinker">
+        @Message
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string? ImageUrl { get; set; }
+    private string Message { get; set; } = "CORRECT";
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (ImageUrl?.ToLower()?.StartsWith("wrong") ?? false)
+            {
+                Message = "WRONG";
+                StateHasChanged();
+            }
+            await Task.Delay(4000);
+            navMan.NavigateTo("/");
+        }
+    }
+
+}
