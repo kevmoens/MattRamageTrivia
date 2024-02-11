@@ -93,11 +93,11 @@ b {
     top: 100px;
     color: #000;
 }
-
+/* 
     .arrowdown::before {
         content: "\1F817";
         font-size: 50px;
-    }
+    } */
 
 
 .roundnum {
@@ -114,12 +114,13 @@ b {
 .arrowright {
     width:20px;
     color: #000;
+    margin-left : 20px;
 }
 
-    .arrowright::before {
+    /* .arrowright::before {
         content: "\1F81A";
         font-size: 50px;
-    }
+    } */
 
 
 #spin {

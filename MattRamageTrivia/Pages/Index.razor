@@ -19,7 +19,9 @@
         <span class="roundnum">Round @CurrentRound</span>
         <div class="spinner-area">
             <button id="spin" @onclick="btnSpin_Click">Spin</button>
-            <span class="arrowdown"></span>
+            <span class="arrowdown">
+                <img src="arrow-down.png" style="height:50px" />
+            </span>
             <div class="spinner-container">
                 <div class="one">250</div>
                 <div class="two">100</div>
@@ -41,7 +43,9 @@
 
                     @if (contestant.Id == CurrentContestantTurn)
                     {
-                        <div class="arrowright"></div>
+                        <div class="arrowright">
+                            <img src="arrow-right.png" style="height:50px" />
+                        </div>
                     }
                     <div class="flex-fill text-center">
                         <h1><b>@contestant.Name</b></h1>
